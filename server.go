@@ -1,31 +1,55 @@
 package main
 
 import (
-    "github.com/tarantool/go-tarantool"
-    // "github.com/tarantool/go-tarantool/crud"
+    "encoding/json"
     "fmt"
+    "github.com/tarantool/go-tarantool"
+    "github.com/tarantool/go-tarantool/crud"
+    "io/ioutil"
     "log"
     "net/http"
     "os"
-    "time"
+    "reflect"
+    "regexp"
+    "strings"
 )
 
-// func init_server() {
-//     resp, err := conn.Call("get_server_config", []interface{}{})
-//     if err != nil {
-//         log.Fatalln("Failed:", err)
-//     }
+func replace(w http.ResponseWriter, req *http.Request, space string, conn *tarantool.Connection) {
+    defer req.Body.Close()
+    body, err := ioutil.ReadAll(req.Body)
 
-//     // go server_start(cfg)
-//     go server_start()
-// }
+    if err != nil {
+        http.Error(w, fmt.Sprintln("Failed to read body:", err), http.StatusInternalServerError)
+        return
+    }
 
-// //  func server_start(cfg []interface{}) {
-// //      log.Println(cfg)
-// //  }
-// func server_start() {
+    data := []interface{}{}
+    err = json.Unmarshal(body, &data)
 
-// }
+    if err != nil {
+        http.Error(w, fmt.Sprintln("Failed to parse body:", err), http.StatusInternalServerError)
+        return
+    }
+
+    treq := crud.MakeReplaceRequest(space).Tuple(data)
+
+    type Tuple struct {
+        _msgpack struct{} `msgpack:",asArray"` //nolint: structcheck,unused
+        ID       uint64
+        BucketID uint64
+        Name     string
+    }
+    ret := crud.MakeResult(reflect.TypeOf(Tuple{}))
+
+    if err := conn.Do(treq).GetTyped(&ret); err != nil {
+        http.Error(w, fmt.Sprintln("Failed to execute request:", err), http.StatusInternalServerError)
+        return
+    }
+
+    fmt.Fprintln(w, ret)
+}
+
+var replaceRoute = regexp.MustCompile(`/data/\w+/replace`)
 
 func main() {
     ListenAddr := os.Getenv("LISTEN_ADDR")
@@ -38,25 +62,18 @@ func main() {
         log.Fatalln("Connection refused:", err)
     }
 
-    mux := http.NewServeMux()
-
-    mux.HandleFunc(
-        "/data/insert",
+    http.HandleFunc(
+        "/",
         func(w http.ResponseWriter, req *http.Request) {
-            resp, err := conn.Eval("return true", []interface{}{})
-            if err != nil {
-                log.Fatalln("Eval failed:", err)
+            switch {
+            case replaceRoute.MatchString(req.URL.Path):
+                p := strings.Split(req.URL.Path, "/")
+                replace(w, req, p[2], conn)
+            default:
+                http.NotFound(w, req)
             }
-            fmt.Fprintln(w, "Welcome to the home page! We've got", resp)
         },
     )
 
-    s := &http.Server{
-        Addr:           "localhost:8080",
-        Handler:        mux,
-        ReadTimeout:    10 * time.Second,
-        WriteTimeout:   10 * time.Second,
-        MaxHeaderBytes: 1 << 20,
-    }
-    log.Fatal(s.ListenAndServe())
+    http.ListenAndServe(":8080", nil)
 }
