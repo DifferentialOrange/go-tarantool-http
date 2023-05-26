@@ -10,7 +10,7 @@ import (
     "net/http"
     "os"
     // "reflect"
-    // "regexp"
+    "regexp"
     // "strings"
 )
 
@@ -65,7 +65,8 @@ func main() {
     }
 
     type Config struct {
-        Listen string `json:"listen"`
+        Listen string            `json:"listen"`
+        Routes map[string]string `json:"routes"`
     }
 
     var cfg Config
@@ -74,29 +75,40 @@ func main() {
         log.Fatalln("Failed to unmarshal config:", err)
     }
 
+    httpRoutes := map[*regexp.Regexp]string{}
+
+    for route, handler := range cfg.Routes {
+        r, err := regexp.Compile(route)
+        if err != nil {
+            log.Fatalln("Failed to compile regex:", err)
+        }
+        httpRoutes[r] = handler
+    }
+
     http.HandleFunc(
-        "/hello",
+        "/",
         func(w http.ResponseWriter, req *http.Request) {
-            eval := tarantool.NewEvalRequest("return 'Hello world!'")
-            resp, err := conn.Do(eval).Get()
-            if err != nil {
-                http.Error(w, fmt.Sprintln("Failed to execute request:", err), http.StatusInternalServerError)
-                return
+            for route, handler := range httpRoutes {
+                if route.Match([]byte(req.URL.Path)) {
+                    call := tarantool.NewCallRequest(handler)
+                    resp, err := conn.Do(call).Get()
+
+                    if err != nil {
+                        http.Error(w, fmt.Sprintln("Failed to execute request:", err), http.StatusInternalServerError)
+                        return
+                    }
+
+                    if len(resp.Data) == 0 {
+                        fmt.Fprintln(w, "empty response")
+                    } else {
+                        fmt.Fprintln(w, resp.Data[0])
+                    }
+
+                    return
+                }
             }
 
-            if len(resp.Data) == 0 {
-                http.Error(w, "Got unexpected zero length response", http.StatusInternalServerError)
-                return
-            }
-
-            // switch {
-            // case replaceRoute.MatchString(req.URL.Path):
-            //     p := strings.Split(req.URL.Path, "/")
-            //     replace(w, req, p[2], conn)
-            // default:
-            //     http.NotFound(w, req)
-            // }
-            fmt.Fprintln(w, resp.Data[0])
+            http.NotFound(w, req)
         },
     )
 

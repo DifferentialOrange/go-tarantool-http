@@ -10,4 +10,6 @@ build.luarocks
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
-Makefile
+!Makefile
+microservice/Makefile
+httpgo/Makefile

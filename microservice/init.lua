@@ -20,12 +20,12 @@ box.schema.user.passwd(user, password)
 box.schema.user.grant(user,'read,write,execute,create,drop', 'universe', nil, {if_not_exists = true})
 
 local function run(module, cfg)
-    local p, err = popen.new({module},
+    local p, err = popen.new({module.binary_path},
         {env = {
             SERVER_LISTEN = box.info.listen,
             SERVER_USER = user,
             SERVER_PASS = password,
-            TT_MICROSERVICE_CFG = json.encode(cfg),
+            TT_MICROSERVICE_CFG = json.encode(module.config_prepare(cfg)),
         }}
     )
 
