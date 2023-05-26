@@ -1,3 +1,13 @@
 *.snap
 *.xlog
-go-tarantool-http
+
+httpgo/httpgo
+httpgo/init.lua
+
+.rocks
+build.luarocks
+*.rock
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile

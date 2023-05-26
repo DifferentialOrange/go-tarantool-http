@@ -1,0 +1,1 @@
+/home/georgymoiseev/Development/github/DifferentialOrange/go-tarantool-http/httpgo/.rocks/bin/httpgo/httpgo

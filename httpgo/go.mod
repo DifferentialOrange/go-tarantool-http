@@ -1,4 +1,4 @@
-module github.com/DifferentialOrange/go-tarantool-http
+module github.com/DifferentialOrange/go-tarantool-http/httpgo
 
 go 1.19
 

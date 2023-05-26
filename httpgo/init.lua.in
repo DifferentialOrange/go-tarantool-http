@@ -1,0 +1,3 @@
+local fio = require('fio')
+
+return fio.pathjoin("${TARANTOOL_INSTALL_BINDIR}", "${PROJECT_NAME}")
