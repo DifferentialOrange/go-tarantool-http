@@ -22,7 +22,7 @@ box.schema.user.grant(user,'read,write,execute,create,drop', 'universe', nil, {i
 local function run(module, cfg)
     local p, err = popen.new({module},
         {env = {
-            LISTEN_ADDR = box.info.listen,
+            SERVER_LISTEN = box.info.listen,
             SERVER_USER = user,
             SERVER_PASS = password,
             TT_MICROSERVICE_CFG = json.encode(cfg),

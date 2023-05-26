@@ -52,14 +52,14 @@ import (
 // var replaceRoute = regexp.MustCompile(`/data/\w+/replace`)
 
 func main() {
-    ListenAddr := os.Getenv("LISTEN_ADDR")
+    ServerListen := os.Getenv("SERVER_LISTEN")
     ServerUser := os.Getenv("SERVER_USER")
     ServerPass := os.Getenv("SERVER_PASS")
 
     ConfigJSON := os.Getenv("TT_MICROSERVICE_CFG")
 
     opts := tarantool.Opts{User: ServerUser, Pass: ServerPass}
-    conn, err := tarantool.Connect(ListenAddr, opts)
+    conn, err := tarantool.Connect(ServerListen, opts)
     if err != nil {
         log.Fatalln("Connection refused:", err)
     }
