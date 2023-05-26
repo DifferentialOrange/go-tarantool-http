@@ -1,7 +1,7 @@
 package main
 
 import (
-    // "encoding/json"
+    "encoding/json"
     "fmt"
     "github.com/tarantool/go-tarantool"
     // "github.com/tarantool/go-tarantool/crud"
@@ -56,12 +56,22 @@ func main() {
     ServerUser := os.Getenv("SERVER_USER")
     ServerPass := os.Getenv("SERVER_PASS")
 
-    // Config := os.Getenv("TT_MICROSERVICE_CFG")
+    ConfigJSON := os.Getenv("TT_MICROSERVICE_CFG")
 
     opts := tarantool.Opts{User: ServerUser, Pass: ServerPass}
     conn, err := tarantool.Connect(ListenAddr, opts)
     if err != nil {
         log.Fatalln("Connection refused:", err)
+    }
+
+    type Config struct {
+        Listen string `json:"listen"`
+    }
+
+    var cfg Config
+
+    if err := json.Unmarshal([]byte(ConfigJSON), &cfg); err != nil {
+        log.Fatalln("Failed to unmarshal config:", err)
     }
 
     http.HandleFunc(
@@ -90,5 +100,7 @@ func main() {
         },
     )
 
-    http.ListenAndServe(":8080", nil)
+    if err := http.ListenAndServe(cfg.Listen, nil); err != nil {
+        log.Fatalln("Failed to start a server:", err)
+    }
 }
