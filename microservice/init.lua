@@ -1,5 +1,7 @@
 local json = require('json')
+local fiber = require('fiber')
 local popen = require('popen')
+local log = require('log')
 
 local charset = {} -- [0-9a-zA-Z]
 for c = 48, 57  do table.insert(charset, string.char(c)) end
@@ -20,20 +22,30 @@ box.schema.user.passwd(user, password)
 box.schema.user.grant(user,'read,write,execute,create,drop', 'universe', nil, {if_not_exists = true})
 
 local function run(module, cfg)
-    local p, err = popen.new({module.binary_path},
-        {env = {
-            SERVER_LISTEN = box.info.listen,
-            SERVER_USER = user,
-            SERVER_PASS = password,
-            TT_MICROSERVICE_CFG = json.encode(module.config_prepare(cfg)),
-        }}
-    )
+    fiber.create(function()
+        fiber.name('microservice')
 
-    if err then
-        error(err)
-    end
+        while true do
+            local p, err = popen.new({module.binary_path},
+                {env = {
+                    SERVER_LISTEN = box.info.listen,
+                    SERVER_USER = user,
+                    SERVER_PASS = password,
+                    TT_MICROSERVICE_CFG = json.encode(module.config_prepare(cfg)),
+                }}
+            )
 
-    return p
+            if err then
+                error(err)
+            end
+
+            while p:info().exit_code == nil do
+                p:wait()
+            end
+
+            log.info("process pid %d exited with %d", p:info().pid, p:info().exit_code)
+        end
+    end)
 end
 
 return {
