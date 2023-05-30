@@ -43,7 +43,7 @@ endif()
 add_custom_command(
   OUTPUT ${PROJECT_NAME}
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.go
-  COMMAND ${CMAKE_Go_COMPILER} build -tags go_tarantool_ssl_disable ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.go
+  COMMAND ${CMAKE_Go_COMPILER} build -tags go_tarantool_ssl_disable -tags go_tarantool_call_17 ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.go
 )
 
 add_custom_target(binary ALL DEPENDS ${PROJECT_NAME})
