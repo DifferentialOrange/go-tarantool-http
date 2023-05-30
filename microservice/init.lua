@@ -39,11 +39,12 @@ local function run(module, cfg)
                 error(err)
             end
 
-            while p:info().exit_code == nil do
+            while p.pid ~= nil do
                 p:wait()
             end
 
-            log.info("process pid %d exited with %d", p:info().pid, p:info().exit_code)
+            log.info("process is no longer alive, info: %s", json.encode(p:info()))
+            p:close()
         end
     end)
 end
