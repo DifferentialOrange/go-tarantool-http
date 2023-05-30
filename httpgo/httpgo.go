@@ -5,7 +5,7 @@ import (
     "fmt"
     "github.com/tarantool/go-tarantool"
     // "github.com/tarantool/go-tarantool/crud"
-    // "io/ioutil"
+    "io/ioutil"
     "log"
     "net/http"
     "os"
@@ -90,7 +90,15 @@ func main() {
         func(w http.ResponseWriter, req *http.Request) {
             for route, handler := range httpRoutes {
                 if route.Match([]byte(req.URL.Path)) {
-                    call := tarantool.NewCallRequest(handler)
+                    defer req.Body.Close()
+                    body, err := ioutil.ReadAll(req.Body)
+
+                    if err != nil {
+                        http.Error(w, fmt.Sprintln("Failed to read body:", err), http.StatusInternalServerError)
+                        return
+                    }
+
+                    call := tarantool.NewCallRequest(handler).Args([]interface{}{body})
                     resp, err := conn.Do(call).Get()
 
                     if err != nil {
