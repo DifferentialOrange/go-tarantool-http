@@ -5,7 +5,7 @@ local json = require('json')
 local microservice = require('microservice')
 local httpgo = require('httpgo')
 
-microservice.run(httpgo, {
+local httpd = microservice.create(httpgo, {
     listen = 'localhost:8081',
     routes = {
         ['/hello'] = function(body)
@@ -37,3 +37,5 @@ microservice.run(httpgo, {
         end,
     }
 })
+
+httpd:run()

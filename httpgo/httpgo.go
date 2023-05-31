@@ -52,27 +52,26 @@ import (
 // var replaceRoute = regexp.MustCompile(`/data/\w+/replace`)
 
 func main() {
-    ServerListen := os.Getenv("SERVER_LISTEN")
-    ServerUser := os.Getenv("SERVER_USER")
-    ServerPass := os.Getenv("SERVER_PASS")
-
     ConfigJSON := os.Getenv("TT_MICROSERVICE_CFG")
 
-    opts := tarantool.Opts{User: ServerUser, Pass: ServerPass}
-    conn, err := tarantool.Connect(ServerListen, opts)
-    if err != nil {
-        log.Fatalln("Connection refused:", err)
-    }
-
     type Config struct {
-        Listen string            `json:"listen"`
-        Routes map[string]string `json:"routes"`
+        Listen   string            `json:"listen"`
+        Routes   map[string]string `json:"routes"`
+        TTListen string            `json:"tt_listen"`
+        TTUser   string            `json:"tt_user"`
+        TTPass   string            `json:"tt_password"`
     }
 
     var cfg Config
 
     if err := json.Unmarshal([]byte(ConfigJSON), &cfg); err != nil {
         log.Fatalln("Failed to unmarshal config:", err)
+    }
+
+    opts := tarantool.Opts{User: cfg.TTUser, Pass: cfg.TTPass}
+    conn, err := tarantool.Connect(cfg.TTListen, opts)
+    if err != nil {
+        log.Fatalln("Connection refused:", err)
     }
 
     httpRoutes := map[*regexp.Regexp]string{}
