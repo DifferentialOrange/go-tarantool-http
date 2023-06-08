@@ -24,34 +24,13 @@ local function get_random_id()
     error('Bad day!')
 end
 
-local user = 'http_microservice_user'
-local password = random_string(15)
-
-if box.schema.user.exists(user) then
-    -- TO DO: drop functions
-    box.schema.user.drop(user)
-end
-
-box.schema.user.create(user, {if_not_exists = true})
-box.schema.user.passwd(user, password)
-
-local function build_config(cfg)
+local function config_prepare(cfg)
     cfg = table.deepcopy(cfg)
-
-    assert(type(cfg.listen) == 'string')
-    assert(type(cfg.routes) == 'table')
-
-    assert(box.info.listen ~= nil)
-    cfg.tt_listen = box.info.listen
-    cfg.tt_user = user
-    cfg.tt_password = password
 
     local routes_mapped = {}
     for route, handler in pairs(cfg.routes) do
         local route_id = get_random_id()
-        rawset(_G, route_id, function(...) box.session.su('admin'); return handler(...) end)
-        box.schema.func.create(route_id)
-        box.schema.user.grant(user, 'execute', 'function', route_id)
+        rawset(_G, route_id, handler)
         routes_mapped[route] = route_id
     end
     cfg.routes = routes_mapped
@@ -60,6 +39,6 @@ local function build_config(cfg)
 end
 
 return {
-	build_config = build_config,
+	config_prepare = config_prepare,
 	binary_path = fio.pathjoin("${TARANTOOL_INSTALL_BINDIR}", "${PROJECT_NAME}"),
 }
