@@ -27,3 +27,7 @@ httpgo-auth/Makefile
 httpgo-monitoring/httpgo-monitoring.so
 httpgo-monitoring/init.lua
 httpgo-monitoring/Makefile
+
+httpgo-lua/httpgo-lua.so
+httpgo-lua/init.lua
+httpgo-lua/Makefile

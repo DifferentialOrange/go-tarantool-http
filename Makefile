@@ -1,15 +1,17 @@
 all: .rocks
 
-.rocks: httpgo/httpgo-scm-1.linux-x86_64.rock \
-	microservice/microservice-scm-1.all.rock \
+.rocks: microservice/microservice-scm-1.all.rock \
+	httpgo/httpgo-scm-1.linux-x86_64.rock \
 	httpgo-crud/httpgo-crud-scm-1.linux-x86_64.rock \
 	httpgo-auth/httpgo-auth-scm-1.linux-x86_64.rock \
-	httpgo-monitoring/httpgo-monitoring-scm-1.linux-x86_64.rock
+	httpgo-monitoring/httpgo-monitoring-scm-1.linux-x86_64.rock \
+	httpgo-lua/httpgo-lua-scm-1.linux-x86_64.rock
 	tt rocks install microservice/microservice-scm-1.all.rock
 	tt rocks install httpgo/httpgo-scm-1.linux-x86_64.rock
 	tt rocks install httpgo-crud/httpgo-crud-scm-1.linux-x86_64.rock
 	tt rocks install httpgo-auth/httpgo-auth-scm-1.linux-x86_64.rock
 	tt rocks install httpgo-monitoring/httpgo-monitoring-scm-1.linux-x86_64.rock
+	tt rocks install httpgo-lua/httpgo-lua-scm-1.linux-x86_64.rock
 
 microservice/microservice-scm-1.all.rock: microservice/microservice-scm-1.rockspec microservice/CMakeLists.txt microservice/init.lua
 	cd ./microservice && tt rocks make && tt rocks pack microservice
@@ -34,3 +36,9 @@ httpgo-monitoring/httpgo-monitoring-scm-1.linux-x86_64.rock: httpgo-monitoring/h
 												 httpgo-monitoring/init.lua.in \
 												 httpgo/httpgo-scm-1.linux-x86_64.rock
 	cd ./httpgo-monitoring && tt rocks install ../httpgo/httpgo-scm-1.linux-x86_64.rock && tt rocks make && tt rocks pack httpgo-monitoring
+
+httpgo-lua/httpgo-lua-scm-1.linux-x86_64.rock: httpgo-lua/httpgo-lua-scm-1.rockspec \
+												 httpgo-lua/CMakeLists.txt httpgo-lua/httpgo-lua.go \
+												 httpgo-lua/init.lua.in \
+												 httpgo/httpgo-scm-1.linux-x86_64.rock
+	cd ./httpgo-lua && tt rocks install ../httpgo/httpgo-scm-1.linux-x86_64.rock && tt rocks make && tt rocks pack httpgo-lua

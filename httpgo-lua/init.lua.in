@@ -1,0 +1,46 @@
+local fio = require('fio')
+
+local charset = {} -- [0-9a-zA-Z]
+for c = 48, 57  do table.insert(charset, string.char(c)) end
+for c = 65, 90  do table.insert(charset, string.char(c)) end
+for c = 97, 122 do table.insert(charset, string.char(c)) end
+
+local function random_string(length)
+    if not length or length <= 0 then return '' end
+    math.randomseed(os.clock()^5)
+    return random_string(length - 1) .. charset[math.random(1, #charset)]
+end
+
+local MAX_RANDOM_ATTEMPTS = 10
+
+local function get_random_id()
+    for _ = 1, MAX_RANDOM_ATTEMPTS do
+        local id = '_httpgo_' .. random_string(10)
+        if rawget(_G, id) == nil then
+            return id
+        end
+    end
+
+    error('Bad day!')
+end
+
+local function inplace_handler(f)
+    local handler_id = 'httpgo-lua-handler-' .. get_random_id()
+
+    rawset(_G, handler_id, f)
+    return handler_id
+end
+
+return {
+    plugin = {
+        lib = fio.pathjoin(
+            ".rocks",
+            "lib",
+            "tarantool",
+            "${PROJECT_NAME}",
+            "${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        ),
+        symbol = "MainHandler",
+    },
+    inplace_handler = inplace_handler
+}
