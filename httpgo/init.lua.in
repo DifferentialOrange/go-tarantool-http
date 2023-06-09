@@ -1,44 +1,44 @@
 local fio = require('fio')
 
-local charset = {} -- [0-9a-zA-Z]
-for c = 48, 57  do table.insert(charset, string.char(c)) end
-for c = 65, 90  do table.insert(charset, string.char(c)) end
-for c = 97, 122 do table.insert(charset, string.char(c)) end
+-- local charset = {} -- [0-9a-zA-Z]
+-- for c = 48, 57  do table.insert(charset, string.char(c)) end
+-- for c = 65, 90  do table.insert(charset, string.char(c)) end
+-- for c = 97, 122 do table.insert(charset, string.char(c)) end
 
-local function random_string(length)
-    if not length or length <= 0 then return '' end
-    math.randomseed(os.clock()^5)
-    return random_string(length - 1) .. charset[math.random(1, #charset)]
-end
+-- local function random_string(length)
+--     if not length or length <= 0 then return '' end
+--     math.randomseed(os.clock()^5)
+--     return random_string(length - 1) .. charset[math.random(1, #charset)]
+-- end
 
-local MAX_RANDOM_ATTEMPTS = 10
+-- local MAX_RANDOM_ATTEMPTS = 10
 
-local function get_random_id()
-    for _ = 1, MAX_RANDOM_ATTEMPTS do
-        local id = '_httpgo_' .. random_string(10)
-        if rawget(_G, id) == nil then
-            return id
-        end
-    end
+-- local function get_random_id()
+--     for _ = 1, MAX_RANDOM_ATTEMPTS do
+--         local id = '_httpgo_' .. random_string(10)
+--         if rawget(_G, id) == nil then
+--             return id
+--         end
+--     end
 
-    error('Bad day!')
-end
+--     error('Bad day!')
+-- end
 
 local function config_prepare(cfg)
     cfg = table.deepcopy(cfg)
 
-    local routes_mapped = {}
-    for route, handler in pairs(cfg.routes) do
-        local route_id = get_random_id()
-        rawset(_G, route_id, handler)
-        routes_mapped[route] = route_id
-    end
-    cfg.routes = routes_mapped
+    -- local routes_mapped = {}
+    -- for route, handler in pairs(cfg.routes) do
+    --     local route_id = get_random_id()
+    --     rawset(_G, route_id, handler)
+    --     routes_mapped[route] = route_id
+    -- end
+    -- cfg.routes = routes_mapped
 
     return cfg
 end
 
 return {
 	config_prepare = config_prepare,
-	binary_path = fio.pathjoin("${TARANTOOL_INSTALL_BINDIR}", "${PROJECT_NAME}"),
+	binary_path = fio.pathjoin(".rocks", "bin", "${PROJECT_NAME}"),
 }

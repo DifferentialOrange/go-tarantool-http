@@ -13,3 +13,7 @@ cmake_install.cmake
 !Makefile
 microservice/Makefile
 httpgo/Makefile
+httpgo-crud/Makefile
+
+httpgo-crud/httpgo-crud.so
+httpgo-crud/init.lua
