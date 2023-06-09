@@ -1,0 +1,14 @@
+local fio = require('fio')
+
+return {
+    plugin = {
+        lib = fio.pathjoin(
+            ".rocks",
+            "lib",
+            "tarantool",
+            "${PROJECT_NAME}",
+            "${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        ),
+        symbol = "MainHandler",
+    }
+}

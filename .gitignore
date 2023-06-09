@@ -1,19 +1,25 @@
 *.snap
 *.xlog
 
-httpgo/httpgo
-httpgo/init.lua
-
 .rocks
 build.luarocks
 *.rock
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
+
 !Makefile
-microservice/Makefile
+
+httpgo/httpgo
+httpgo/init.lua
 httpgo/Makefile
-httpgo-crud/Makefile
+
+microservice/Makefile
 
 httpgo-crud/httpgo-crud.so
 httpgo-crud/init.lua
+httpgo-crud/Makefile
+
+httpgo-auth/httpgo-auth.so
+httpgo-auth/init.lua
+httpgo-auth/Makefile
