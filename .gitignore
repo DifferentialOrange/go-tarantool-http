@@ -23,3 +23,7 @@ httpgo-crud/Makefile
 httpgo-auth/httpgo-auth.so
 httpgo-auth/init.lua
 httpgo-auth/Makefile
+
+httpgo-monitoring/httpgo-monitoring.so
+httpgo-monitoring/init.lua
+httpgo-monitoring/Makefile
